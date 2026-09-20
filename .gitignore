@@ -1,0 +1,28 @@
+node_modules/
+.depguard/
+coverage/
+.env
+.env.*
+!.env.example
+
+# Rust build output
+target/
+
+# macOS
+.DS_Store
+
+# Local signing keys
+*.key
+*.pem
+*.p12
+local.pub
+
+# Local npm/auth files
+.npmrc
+
+# Temporary Verdaccio/local registry data
+verdaccio-storage/
+.storage/
+
+# Temporary logs
+*.log

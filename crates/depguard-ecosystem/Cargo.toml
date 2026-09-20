@@ -1,0 +1,10 @@
+[package]
+name = "depguard-ecosystem"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+async-trait = "0.1"
+depguard-core = { path = "../depguard-core" }

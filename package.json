@@ -1,0 +1,15 @@
+{
+  "name": "depguard",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local-first counterfactual dependency verification for npm projects",
+  "type": "module",
+  "bin": { "depguard": "./bin/depguard.js" },
+  "scripts": {
+    "test": "cargo test --workspace",
+    "lint": "cargo fmt --all -- --check && cargo clippy --workspace --all-targets --all-features -- -D warnings",
+    "typecheck": "cargo check --workspace"
+  },
+  "engines": { "node": ">=20" },
+  "license": "Apache-2.0"
+}

@@ -1,0 +1,49 @@
+[workspace]
+resolver = "2"
+members = [
+  "crates/depguard-cli",
+  "crates/depguard-core",
+  "crates/depguard-config",
+  "crates/depguard-ecosystem",
+  "crates/depguard-npm",
+  "crates/depguard-resolver",
+  "crates/depguard-sandbox",
+  "crates/depguard-observer",
+  "crates/depguard-diff",
+  "crates/depguard-security",
+  "crates/depguard-provenance",
+  "crates/depguard-policy",
+  "crates/depguard-attestation",
+  "crates/depguard-evidence",
+]
+
+[workspace.package]
+version = "0.2.0"
+edition = "2024"
+license = "Apache-2.0"
+rust-version = "1.88"
+
+[workspace.dependencies]
+anyhow = "1.0"
+base64 = "0.22"
+clap = { version = "4.5", features = ["derive"] }
+hex = "0.4"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_yaml = "0.9"
+sha2 = "0.10"
+tempfile = "3.15"
+thiserror = "2.0"
+tokio = { version = "1.43", features = ["macros", "process", "rt-multi-thread", "time", "fs", "io-util"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+walkdir = "2.5"
+jsonschema = "0.30"
+ed25519-dalek = { version = "2.1", features = ["rand_core"] }
+rand_core = { version = "0.6", features = ["getrandom"] }
+serde_json_canonicalizer = "0.3.2"
+
+[profile.release]
+lto = true
+codegen-units = 1

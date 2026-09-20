@@ -1,0 +1,61 @@
+{
+  "schema": "1",
+  "subject": {
+    "ecosystem": "npm",
+    "package": "example-package",
+    "baseline": {"version": "1.0.0", "purl": "pkg:npm/example-package@1.0.0"},
+    "candidate": {"version": "2.0.0", "purl": "pkg:npm/example-package@2.0.0"}
+  },
+  "environment": {
+    "os": "linux",
+    "architecture": "x86_64",
+    "runtime": "node",
+    "packageManager": "npm",
+    "sandboxBackend": "docker",
+    "containerImageReference": "node:20-alpine",
+    "containerImageDigest": null
+  },
+  "artifacts": {
+    "baselineArtifactDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "candidateArtifactDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "baselineRegistryIntegrity": "sha512-baseline",
+    "candidateRegistryIntegrity": "sha512-candidate",
+    "baselineLockfileDigest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "candidateLockfileDigest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "baselineDependencyGraphDigest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "candidateDependencyGraphDigest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "behaviorEvidenceDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+  },
+  "verification": {
+    "baseline": [{"name": "test", "status": "PASSED", "exitCode": 0}],
+    "candidate": [{"name": "test", "status": "FAILED", "exitCode": 1}]
+  },
+  "observations": {
+    "filesystem": [{"path": "candidate-marker.txt", "kind": "file", "size": 7, "sha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222", "executable": false}],
+    "processes": [{"executable": "node", "arguments": ["test"], "parent_executable": "npm", "exit_code": 1}],
+    "networkObservationStatus": "UNAVAILABLE",
+    "sandboxNetworkPolicy": "DENY",
+    "resources": {
+      "wallTime": {"status": "OBSERVED", "milliseconds": 321},
+      "peakMemory": {"status": "UNAVAILABLE", "milliseconds": null},
+      "cpu": {"status": "UNAVAILABLE", "milliseconds": null}
+    }
+  },
+  "externalIntelligence": [{"provider": "osv", "status": "unavailable", "sourceIdentifier": null, "findings": []}],
+  "policy": {"outcome": "REVIEW_REQUIRED", "findings": ["candidate test failed"]},
+  "capabilities": {
+    "filesystemObservation": {"status": "SUPPORTED", "backend": "snapshot-diff"},
+    "processObservation": {"status": "PARTIAL", "backend": "docker-process-polling"},
+    "networkObservation": {"status": "UNAVAILABLE", "backend": null},
+    "networkSandboxPolicy": {"status": "ENFORCED", "backend": "docker-network-none"}
+  },
+  "methodology": {
+    "evidenceSchemaVersion": "1",
+    "verificationMethodologyVersion": "1",
+    "normalizationVersion": "1",
+    "depguardVersion": "0.2.0",
+    "observerVersion": "docker-process-polling-v1",
+    "sandboxVersion": "docker-v1"
+  },
+  "missingEvidence": [{"kind": "network-observation", "reason": "observer-not-implemented"}]
+}

@@ -1,0 +1,8 @@
+{
+  "name": "npm-install-script-fixture",
+  "type": "module",
+  "private": true,
+  "version": "1.0.0",
+  "dependencies": { "example-package": "1.0.0" },
+  "scripts": { "build": "node scripts/build.js", "test": "node --test" }
+}

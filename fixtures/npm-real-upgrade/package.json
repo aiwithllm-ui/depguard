@@ -1,0 +1,12 @@
+{
+  "name": "depguard-real-upgrade-fixture",
+  "private": true,
+  "version": "1.0.0",
+  "dependencies": {
+    "example-package": "1.0.0"
+  },
+  "scripts": {
+    "build": "node build.js",
+    "test": "node --test"
+  }
+}

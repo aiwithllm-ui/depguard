@@ -1,0 +1,9 @@
+[package]
+name = "depguard-diff"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+serde.workspace = true
+depguard-core = { path = "../depguard-core" }

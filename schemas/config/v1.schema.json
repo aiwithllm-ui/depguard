@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://depguard.dev/schemas/config/v1.schema.json",
+  "title": "DepGuard configuration v1",
+  "type": "object",
+  "required": ["version"],
+  "properties": {
+    "version": { "const": 1 },
+    "verify": { "type": "object", "properties": { "commands": { "type": "object", "additionalProperties": { "type": "string" } } } },
+    "sandbox": { "type": "object", "properties": { "backend": { "enum": ["oci"] }, "network": { "enum": ["deny", "allow"] }, "memory": { "type": "string" }, "cpus": { "type": ["number", "string"] }, "timeout": { "type": "string" } } },
+    "privacy": { "type": "object", "properties": { "publishEvidence": { "const": false } } }
+  }
+}

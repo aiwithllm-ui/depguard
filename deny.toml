@@ -1,0 +1,40 @@
+# cargo-deny policy for the DepGuard workspace.  The release-specific notice
+# is generated separately from crates/depguard-cli with about.toml.
+[graph]
+targets = [
+    "x86_64-unknown-linux-gnu",
+    "aarch64-apple-darwin",
+    "x86_64-apple-darwin",
+]
+all-features = true
+
+[licenses]
+# Require high-confidence recognition when a crate's declared SPDX expression
+# is unavailable or incomplete.  Unlicensed crates are errors in cargo-deny.
+confidence-threshold = 0.93
+allow = [
+    "Apache-2.0",
+    "MIT",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    # borrow-or-share 0.2.4 in the CLI runtime graph.
+    "MIT-0",
+    "Unicode-3.0",
+    "Zlib",
+    # webpki-roots 1.0.9 supplies the bundled trust-store data used by reqwest.
+    "CDLA-Permissive-2.0",
+]
+exceptions = [
+    # ring incorporates permissively licensed code under these three terms;
+    # cargo-about uses its maintained workaround when generating notices.
+    { allow = ["ISC", "MIT", "OpenSSL"], crate = "ring" },
+]
+
+[sources]
+# The locked release graph must come only from crates.io; no unreviewed git or
+# alternate-registry source can enter unnoticed.
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-git = []

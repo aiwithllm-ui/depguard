@@ -1,0 +1,11 @@
+name: Observer or provider improvement
+description: Improve observation, provenance, or external intelligence handling
+title: "observer: "
+labels: [enhancement]
+body:
+  - type: textarea
+    attributes:
+      label: Proposed improvement
+      description: Describe signals, availability/failure behavior, privacy, and test approach.
+    validations:
+      required: true

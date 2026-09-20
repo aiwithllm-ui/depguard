@@ -1,0 +1,16 @@
+name: Feature request
+description: Propose an improvement within the current project scope
+title: "feature: "
+labels: [enhancement]
+body:
+  - type: textarea
+    attributes:
+      label: Problem and proposed outcome
+      description: Explain the user need and any alternatives considered.
+    validations:
+      required: true
+  - type: checkboxes
+    attributes:
+      label: Protocol impact
+      options:
+        - label: This proposal does not change frozen V1 semantics.

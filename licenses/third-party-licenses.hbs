@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>DepGuard third-party licenses</title>
+  <style>
+    body { font-family: sans-serif; line-height: 1.45; margin: 2rem auto; max-width: 72rem; padding: 0 1rem; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #888; padding: .4rem; text-align: left; vertical-align: top; }
+    pre { max-height: 24rem; overflow: auto; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>DepGuard third-party licenses</h1>
+  <p>
+    Generated from the committed Cargo.lock for the <code>depguard</code> CLI
+    release binary. It covers Linux x86_64, macOS arm64, and macOS x86_64;
+    build-only and development/test-only crates are intentionally excluded.
+    Regenerate with the command documented in docs/release/license-attribution.md.
+  </p>
+
+  <h2>Third-party components</h2>
+  <table>
+    <thead><tr><th>Crate</th><th>Version</th><th>SPDX license expression</th><th>Copyright/author metadata</th><th>Source</th></tr></thead>
+    <tbody>
+    {{#each crates}}
+      {{#if package.source}}
+        <tr>
+          <td>{{package.name}}</td>
+          <td>{{package.version}}</td>
+          <td>{{license}}</td>
+          <td>{{#if package.authors}}{{#each package.authors}}{{this}}<br>{{/each}}{{else}}Not declared in Cargo metadata{{/if}}</td>
+          <td><a href="{{#if package.repository}}{{package.repository}}{{else}}https://crates.io/crates/{{package.name}}{{/if}}">reference</a></td>
+        </tr>
+      {{/if}}
+    {{/each}}
+    </tbody>
+  </table>
+
+  <h2>License texts</h2>
+  {{#each overview}}
+    <h3 id="{{id}}">{{name}}</h3>
+    <pre>{{text}}</pre>
+  {{/each}}
+</body>
+</html>

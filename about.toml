@@ -1,0 +1,41 @@
+# cargo-about configuration for the binaries shipped by v0.1.0-alpha.1.
+#
+# This policy is intentionally limited to permissive licenses present in the
+# locked depguard CLI release graph. Adding a dependency under another license
+# requires an explicit policy review rather than expanding this list by default.
+accepted = [
+    "Apache-2.0",
+    "MIT",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    # Present in the locked runtime graph through borrow-or-share 0.2.4.
+    # MIT-0 is the OSI-approved MIT No Attribution license.
+    "MIT-0",
+    "Unicode-3.0",
+    "Zlib",
+    # Present only in the webpki-roots trust-store data shipped by reqwest.
+    # Retain its full text in the generated notice.
+    "CDLA-Permissive-2.0",
+]
+
+# These are the only binary-release targets published by this workflow.
+targets = [
+    "x86_64-unknown-linux-gnu",
+    "aarch64-apple-darwin",
+    "x86_64-apple-darwin",
+]
+
+# Build scripts/proc macros and test-only dependencies do not enter a shipped
+# depguard binary. They remain covered by the workspace cargo-deny policy.
+ignore-build-dependencies = true
+ignore-dev-dependencies = true
+ignore-transitive-dependencies = false
+
+# Use cargo-about's maintained, hash-checked clarifications for crates whose
+# packaged license layout is not machine-readable.
+workarounds = ["ring", "rustls", "rustix"]
+
+# ring's maintained workaround identifies its additional OpenSSL license.
+[ring]
+accepted = ["OpenSSL"]

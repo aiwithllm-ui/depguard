@@ -1,0 +1,17 @@
+name: Bug report
+description: Report a reproducible problem in DepGuard
+title: "bug: "
+labels: [bug]
+body:
+  - type: textarea
+    attributes:
+      label: What happened?
+      description: Include expected and actual behavior. Do not include credentials or sensitive evidence.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Reproduction
+      description: Include minimal commands, OS, Rust, Docker, and Node versions where relevant.
+    validations:
+      required: true

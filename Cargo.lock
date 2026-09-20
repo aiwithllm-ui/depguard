@@ -504,7 +504,7 @@ checksum = "4583a4551df46e2792f82ceeac45e850d2e2d5debba0b91f102385cda5b11f06"
 
 [[package]]
 name = "depguard-attestation"
-version = "0.2.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "base64",
@@ -522,7 +522,7 @@ dependencies = [
 
 [[package]]
 name = "depguard-cli"
-version = "0.2.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "base64",
@@ -551,7 +551,7 @@ dependencies = [
 
 [[package]]
 name = "depguard-config"
-version = "0.2.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "depguard-core",
@@ -562,7 +562,7 @@ dependencies = [
 
 [[package]]
 name = "depguard-core"
-version = "0.2.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "hex",
  "serde",
@@ -573,7 +573,7 @@ dependencies = [
 
 [[package]]
 name = "depguard-diff"
-version = "0.2.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "depguard-core",
  "serde",
@@ -581,7 +581,7 @@ dependencies = [
 
 [[package]]
 name = "depguard-ecosystem"
-version = "0.2.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -590,7 +590,7 @@ dependencies = [
 
 [[package]]
 name = "depguard-evidence"
-version = "0.2.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "depguard-core",
@@ -604,7 +604,7 @@ dependencies = [
 
 [[package]]
 name = "depguard-network-client"
-version = "0.2.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "axum",
@@ -617,7 +617,7 @@ dependencies = [
 
 [[package]]
 name = "depguard-npm"
-version = "0.2.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "base64",
@@ -634,7 +634,7 @@ dependencies = [
 
 [[package]]
 name = "depguard-observer"
-version = "0.2.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "depguard-core",
@@ -647,7 +647,7 @@ dependencies = [
 
 [[package]]
 name = "depguard-policy"
-version = "0.2.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "depguard-config",
@@ -658,7 +658,7 @@ dependencies = [
 
 [[package]]
 name = "depguard-provenance"
-version = "0.2.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "depguard-core",
  "serde",
@@ -666,7 +666,7 @@ dependencies = [
 
 [[package]]
 name = "depguard-resolver"
-version = "0.2.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "depguard-core",
@@ -681,7 +681,7 @@ dependencies = [
 
 [[package]]
 name = "depguard-sandbox"
-version = "0.2.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "depguard-core",
@@ -692,7 +692,7 @@ dependencies = [
 
 [[package]]
 name = "depguard-security"
-version = "0.2.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "depguard-core",
@@ -704,7 +704,7 @@ dependencies = [
 
 [[package]]
 name = "depguard-server"
-version = "0.2.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "axum",
@@ -731,7 +731,7 @@ dependencies = [
 
 [[package]]
 name = "depguard-worker"
-version = "0.2.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "depguard-server",

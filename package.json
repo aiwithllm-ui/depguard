@@ -1,6 +1,6 @@
 {
   "name": "depguard",
-  "version": "0.1.0",
+  "version": "0.1.0-alpha.1",
   "private": true,
   "description": "Local-first counterfactual dependency verification for npm projects",
   "type": "module",

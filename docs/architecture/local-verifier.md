@@ -11,12 +11,12 @@ candidate twin ─> observer ┘
 
 The twin copies are made before the dependency version in the candidate manifest is changed. Both receive the same command plan. Results are compared as status, redacted output summaries, duration, and filesystem changes. Portable observation deliberately reports unavailable signals rather than inventing network or syscall claims.
 
-The OCI executor applies network denial, dropped capabilities, `no-new-privileges`, a read-only root filesystem, temporary workspace, PID limit, memory limit, CPU limit, and timeout. Package installation uses `--ignore-scripts`; lifecycle changes are reported as metadata evidence. `--unsafe-host-execution` is clearly marked in the evidence and is intended only for controlled fixtures.
+The Docker executor applies network denial, dropped capabilities, `no-new-privileges`, a read-only root filesystem, temporary workspace, PID limit, memory limit, CPU limit, and timeout. Package installation uses `--ignore-scripts`; lifecycle changes are reported as metadata evidence. The current public CLI has no host-execution escape hatch.
 
 ## Extension seams
 
-- `metadata.js`: registry, OSV, deps.dev, and provenance providers
-- `sandbox.js`: OCI, gVisor, Firecracker, platform-native backends
+- `depguard-npm`, `depguard-security`, and `depguard-provenance`: registry, OSV, deps.dev, and provenance providers
+- `depguard-sandbox`: Docker today; OCI alternatives can be proposed without changing evidence semantics
 - behavior record: portable observer now; syscall/eBPF observer later
-- evidence schema: in-toto predicate and DSSE/Sigstore envelope later
-- network: optional ingestion only after signed privacy-sanitized evidence exists
+- `depguard-evidence` and `depguard-attestation`: frozen public evidence, DSSE, and in-toto attestation handling
+- `depguard-server` and `depguard-network-client`: optional ingestion of already-signed public attestations

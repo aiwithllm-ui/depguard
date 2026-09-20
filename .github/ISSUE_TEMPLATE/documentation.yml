@@ -1,0 +1,11 @@
+name: Documentation improvement
+description: Report confusing, missing, or inaccurate documentation
+title: "docs: "
+labels: [documentation]
+body:
+  - type: textarea
+    attributes:
+      label: What needs improvement?
+      description: Link the page and describe the correction or missing explanation.
+    validations:
+      required: true

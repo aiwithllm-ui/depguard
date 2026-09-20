@@ -8,6 +8,10 @@ coverage/
 # Rust build output
 target/
 
+# Temporary local PostgreSQL data
+postgres-data/
+pgdata/
+
 # macOS
 .DS_Store
 
@@ -26,3 +30,4 @@ verdaccio-storage/
 
 # Temporary logs
 *.log
+logs/

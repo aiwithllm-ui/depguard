@@ -1,1 +1,10 @@
-The initial MVP has no bundled third-party runtime dependencies.
+DepGuard v0.1.0-alpha.1 third-party Rust dependency attribution is in
+THIRD_PARTY_LICENSES.html. That generated file identifies every runtime crate
+in the distributed depguard CLI for Linux x86_64, macOS arm64, and macOS x86_64,
+with its version, SPDX expression, source reference, and applicable license
+text. It is generated from Cargo.lock using cargo-about under about.toml.
+
+This file is a release-archive entry point; it is not DepGuard's own license.
+DepGuard itself is Apache-2.0 under LICENSE. See NOTICE for the separation of
+project-level and third-party attribution, and docs/release/license-attribution.md
+for reproducible generation and verification commands.

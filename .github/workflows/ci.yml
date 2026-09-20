@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  workspace:
+    name: Rust workspace checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - run: cargo fmt --check
+      - run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+      - run: cargo test --workspace --locked
+      - run: cargo check --workspace --locked
+      - name: Frozen V1 protocol conformance
+        run: cargo test -p depguard-attestation --test protocol_v1_conformance --locked
+
+  licenses:
+    name: Binary license attribution
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install locked license tooling
+        run: |
+          cargo install --locked cargo-deny --version 0.20.2
+          cargo install --locked cargo-about --version 0.9.2 --features cli
+      - name: Enforce the declared license policy
+        run: cargo deny check licenses
+      - name: Reject unreviewed dependency sources
+        run: cargo deny check sources
+      - name: Verify binary attribution is current
+        run: |
+          cargo about generate --locked --fail \
+            --manifest-path crates/depguard-cli/Cargo.toml \
+            --config about.toml \
+            licenses/third-party-licenses.hbs \
+            --output-file /tmp/THIRD_PARTY_LICENSES.html
+          diff --unified=3 THIRD_PARTY_LICENSES.html /tmp/THIRD_PARTY_LICENSES.html
+
+  postgres-network-integration:
+    name: PostgreSQL network trust boundary
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: depguard
+          POSTGRES_USER: depguard
+          POSTGRES_PASSWORD: depguard
+        options: >-
+          --health-cmd "pg_isready -U depguard -d depguard"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+        ports:
+          - 5432:5432
+    env:
+      DATABASE_URL: postgresql://depguard:depguard@localhost:5432/depguard
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Run migrations through the empty-database integration contract
+        run: cargo test -p depguard-server --test postgres_network --locked -- --ignored

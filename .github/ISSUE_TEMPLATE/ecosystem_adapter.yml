@@ -1,0 +1,17 @@
+name: New ecosystem adapter
+description: Propose groundwork for a future package ecosystem adapter
+title: "ecosystem: "
+labels: [ecosystem]
+body:
+  - type: textarea
+    attributes:
+      label: Ecosystem and package-manager behavior
+      description: Describe lockfiles, deterministic installation, metadata, sandbox needs, and test fixtures.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Protocol and security considerations
+      description: Explain how the adapter would preserve frozen V1 semantics and local-first boundaries.
+    validations:
+      required: true

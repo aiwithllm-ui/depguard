@@ -1,101 +1,98 @@
 # DepGuard
 
-**Know what changes before a dependency enters your application.**
+DepGuard is a local-first verifier for npm dependency upgrades. It creates equivalent baseline and candidate project twins, runs their configured checks in a hardened Docker sandbox, compares what it can observe, and emits versioned Compatibility Evidence V1.
 
-DepGuard is a local-first trust and compatibility layer for software dependencies. It creates baseline and candidate twins of an npm project, runs configured checks in equivalent isolated environments, compares observable evidence, inspects package deltas, and emits a versioned evidence document.
+It exists to answer a practical, deliberately narrow question: **what changed for this project when a direct dependency moved between two exact versions?** DepGuard produces evidence and policy findings; it does not guarantee a dependency is safe or prove that a package is secure.
 
-It answers a narrower, more useful question than “is this package safe?”:
+## Status: alpha, npm-first
 
-> What changed when this repository moved from this exact dependency version to that one, and what reproducible evidence supports the result?
-
-## What makes it different
-
-| Tool | Primary question |
-| --- | --- |
-| Dependabot / Renovate | What can I update? |
-| npm audit / OSV | Does a known vulnerability affect a dependency? |
-| CI | Does the current pipeline pass? |
-| **DepGuard** | What changes in **this application** for **this dependency transition**? |
-
-DepGuard does not produce an opaque “trust score” and never claims a dependency is absolutely safe.
-
-## Quick start
-
-Requires Node.js 20+ for this MVP. The default verifier requires Docker or Podman; it will not run repository or dependency code directly on the host.
-
-```bash
-npm install
-npm test
-node bin/depguard.js init
-node bin/depguard.js doctor
-node bin/depguard.js verify axios@1.9.1
-```
-
-The package also exposes `depguard` when installed as a CLI package:
-
-```bash
-depguard scan
-depguard verify axios@1.9.1 --json --output evidence.json
-depguard report
-```
-
-For controlled development fixtures only, use `--unsafe-host-execution`. This escape hatch emits a prominent evidence flag and disables the claim that code was isolated. It should never be the normal developer or CI path.
-
-## Architecture
+`v0.1.0-alpha.1` supports npm projects with `package.json` and a direct dependency. The local verifier, frozen V1 evidence/attestation protocols, opt-in PostgreSQL-backed network MVP, and GitHub Actions Sigstore identity path are implemented. The public API and operational details may still change outside the frozen V1 protocol contracts.
 
 ```text
-Package registry ──> factual package delta ──────────────┐
-                                                         │
-Your repository ──> baseline twin ──> configured checks ─┼─> behavior diff ─> evidence
-                 └> candidate twin ─> configured checks ─┘                     │
-                                                                                └> future signed attestation
+dependency upgrade
+      ↓
+baseline / candidate twins
+      ↓
+sandboxed verification
+      ↓
+Compatibility Evidence V1
+      ↓
+Attestation V1
+      ↓
+optional publish
+      ↓
+global compatibility network
 ```
 
-The OCI execution backend uses a temporary project copy, a non-networked container, a read-only container filesystem, dropped capabilities, `no-new-privileges`, PID/memory/CPU limits, and a constrained writable workspace. The project source itself is never uploaded.
+## Five-minute quick start
 
-## Current MVP scope
+Prerequisites:
 
-- npm-family project detection: npm, pnpm, and Yarn lockfiles
-- direct dependency transition discovery from manifests/`package-lock.json`
-- controlled registry metadata lookup or supplied offline metadata
-- lifecycle-script, dependency-count, and license delta evidence
-- baseline/candidate workspace execution of build, test, typecheck, and lint
-- portable filesystem and timing comparison
-- JSON evidence (`schemas/compatibility-evidence/v1.schema.json`) and human report
-- stable exit statuses: `0` verified, `10` review, `20` failed, `30` suspicious, `40` environment failure
+- Rust 1.88 or newer (the locked workspace is the source of truth).
+- Docker with a running daemon for `verify`; the current sandbox backend invokes Docker directly.
+- Node.js 20+ and npm, both for your npm project and inside the default `node:20-alpine` sandbox image.
+- PostgreSQL is needed only to develop or test the optional network MVP.
 
-Network tracing, OSV/deps.dev providers, deep process tracing, DSSE signing, and the global evidence service are deliberately separated extension points; they are not simulated as completed features. See [ROADMAP.md](ROADMAP.md).
-
-## Configuration
-
-`depguard init` creates an inspectable `depguard.yaml`. Projects with no configuration are still useful: scripts named `build`, `test`, `typecheck`, and `lint` are detected automatically.
-
-```yaml
-version: 1
-verify:
-  commands:
-    build: npm run build
-    test: npm test
-sandbox:
-  network: deny
-  memory: 4GiB
-  cpus: 2
-  timeout: 20m
-privacy:
-  publishEvidence: false
-```
-
-## Privacy
-
-Local verification does not upload source, fixtures, environment values, or raw application logs. Reports use an anonymized local project fingerprint. The future publication pathway is opt-in only and must sanitize evidence before signing.
-
-## Development
+From a clean checkout:
 
 ```bash
-npm test
-npm run lint
+cargo build --workspace --locked
+cargo test --workspace --locked
+cargo run -p depguard-cli -- doctor
 ```
 
-The fixtures cover a verified update, a real application-level breaking transition, and a new lifecycle script that requires review.
+For a real verification, build the release CLI and point it at an npm project with the dependency already declared directly:
 
-Read [the threat model](docs/security/threat-model.md), [architecture notes](docs/architecture/local-verifier.md), and [contributing guide](CONTRIBUTING.md) before extending sandboxing or evidence code.
+```bash
+cargo build --release --locked -p depguard-cli
+./target/release/depguard doctor
+./target/release/depguard verify lodash@4.17.21 --project /path/to/npm-project \
+  --evidence-out evidence.json
+```
+
+`verify` prints evidence (or JSON with `--json`) and can persist the public Compatibility Evidence V1 document using `--evidence-out`. The controlled Docker-backed system test demonstrates a complete local verification path without an external package registry:
+
+```bash
+cargo test -p depguard-cli --test real_system -- --nocapture
+```
+
+Generate and independently verify a local development attestation without contacting a network service:
+
+```bash
+depguard key-generate --private-key local.key --public-key local.pub
+depguard attest evidence.json --key local.key --output attestation.json
+depguard attest-verify attestation.json --public-key local.pub
+```
+
+`local.key` is a local development key: protect it and do not commit it. Publish is optional and transmits only an already-signed attestation:
+
+```bash
+depguard publish attestation.json --url https://network.example.invalid
+```
+
+For the network MVP and its separate Sigstore CI identity wrapper, see [Network MVP](docs/network-mvp.md). A valid GitHub CI Sigstore identity authenticates that CI execution; it is not maintainer or release approval.
+
+## Current Alpha Limitations
+
+- npm is the primary implemented ecosystem; DepGuard does not yet support PyPI, Cargo, Maven, or NuGet verification.
+- Full verification needs Docker and a running daemon. Podman is not currently invoked by the CLI backend.
+- Process observation is sampled and partial. Network execution is denied by policy; it is not fully observed or recorded.
+- External intelligence and provenance providers are incomplete; unavailable signals are reported rather than inferred.
+- The global compatibility network is an opt-in PostgreSQL MVP, not a federation or public explorer.
+- Sigstore CI identity validates a GitHub Actions identity when configured; it does not establish package ownership, maintainer approval, or release authorization.
+- The command executes npm install and configured project scripts inside the sandbox. Review your project configuration and evidence before relying on a conclusion.
+
+## Documentation and contributing
+
+Start with the [documentation index](docs/README.md): it links the frozen V1 protocols, verifier architecture, threat model, network MVP, ADRs, governance, security policy, roadmap, and release notes.
+
+Outside developers can use the standard Rust workflow:
+
+```bash
+cargo fmt --check
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+cargo test --workspace
+cargo check --workspace
+```
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request. The four V1 protocols are frozen; application version `0.1.0-alpha.1` is intentionally independent of the V1 protocol identifiers.

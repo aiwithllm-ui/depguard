@@ -1,0 +1,101 @@
+name: Release artifacts
+
+on:
+  push:
+    tags: ["v0.1.0-alpha.1"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag to label a draft-release upload
+        required: false
+        type: string
+      upload_to_draft:
+        description: Upload the collected artifacts to an existing draft release
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    name: ${{ matrix.asset_name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            asset_name: depguard-v0.1.0-alpha.1-linux-x86_64
+          - os: macos-14
+            target: aarch64-apple-darwin
+            asset_name: depguard-v0.1.0-alpha.1-macos-arm64
+          - os: macos-13
+            target: x86_64-apple-darwin
+            asset_name: depguard-v0.1.0-alpha.1-macos-x86_64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - run: cargo build --locked --release -p depguard-cli --target ${{ matrix.target }}
+      - name: Package binary, notices, checksum, and dependency metadata
+        shell: bash
+        run: |
+          mkdir dist
+          cp target/${{ matrix.target }}/release/depguard dist/depguard
+          cp LICENSE NOTICE THIRD_PARTY_LICENSES THIRD_PARTY_LICENSES.html dist/
+          (
+            cd dist
+            shasum -a 256 depguard > SHA256SUMS
+          )
+          tar -czf ${{ matrix.asset_name }}.tar.gz -C dist \
+            depguard LICENSE NOTICE THIRD_PARTY_LICENSES THIRD_PARTY_LICENSES.html SHA256SUMS
+          shasum -a 256 ${{ matrix.asset_name }}.tar.gz > ${{ matrix.asset_name }}.tar.gz.sha256
+          cargo metadata --locked --format-version 1 > ${{ matrix.asset_name }}-cargo-metadata.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset_name }}
+          path: |
+            ${{ matrix.asset_name }}.tar.gz
+            ${{ matrix.asset_name }}.tar.gz.sha256
+            ${{ matrix.asset_name }}-cargo-metadata.json
+          if-no-files-found: error
+
+  collect:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: depguard-v0.1.0-alpha.1-*
+          merge-multiple: true
+          path: release-artifacts
+      - run: sha256sum release-artifacts/*.tar.gz > release-artifacts/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: depguard-v0.1.0-alpha.1-release-artifacts
+          path: release-artifacts
+          if-no-files-found: error
+
+  upload-to-existing-draft:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.upload_to_draft }}
+    needs: collect
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: depguard-v0.1.0-alpha.1-release-artifacts
+          path: release-artifacts
+      - name: Upload only to an existing draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: gh release upload "$RELEASE_TAG" release-artifacts/* --clobber

@@ -1,8 +1,12 @@
 # Roadmap
 
-1. Complete the npm local verifier with lockfile mutation, controlled artifact fetching, OSV/deps.dev providers, and Docker integration fixtures.
-2. Add portable process/network observation and Linux-specific deep telemetry.
-3. Emit DSSE/in-toto attestations with local and keyless CI identities.
-4. Build opt-in evidence ingestion, verification, and public aggregation.
-5. Add GitHub Action and workload replay.
-6. Add further ecosystems after npm verification is proven.
+## Alpha focus
+
+- Make the npm-first local verifier reproducible, understandable, and well tested.
+- Improve controlled npm metadata, OSV/deps.dev, provenance, and observer providers.
+- Improve Docker and platform compatibility while preserving the local-first boundary.
+- Strengthen test fixtures, documentation, and network API client ergonomics.
+
+## Later, by proposal
+
+Potential future work includes additional ecosystems, richer observation, Compatibility Packs, and broader network capabilities. These are not implemented in this release and are not promises or contributor acceptance criteria. See [CONTRIBUTING.md](CONTRIBUTING.md#good-first-contributions) for suitable current work.

@@ -1,4 +1,8 @@
 DepGuard
 Copyright 2026 DepGuard contributors
 
-This product includes no third-party runtime dependencies in the initial MVP.
+DepGuard is distributed under Apache-2.0. Its Rust dependency inventory is
+recorded in Cargo.lock; release builds also attach Cargo metadata as dependency
+metadata. THIRD_PARTY_LICENSES.html contains the third-party Rust dependency
+attribution shipped with the depguard binary. This NOTICE is for DepGuard's own
+project-level attribution and does not alter third-party license terms.

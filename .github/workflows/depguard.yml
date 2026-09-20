@@ -1,0 +1,38 @@
+name: DepGuard verified CI submission
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        description: Exact dependency candidate, for example example-package@2.0.0
+        required: true
+        type: string
+      network_url:
+        description: DepGuard network endpoint
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write # short-lived GitHub Actions OIDC token for Fulcio/Cosign
+
+jobs:
+  verify-attest-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: sigstore/cosign-installer@v3
+      - name: Build DepGuard
+        run: cargo build --locked --release -p depguard-cli
+      - name: Verify the requested dependency
+        run: target/release/depguard verify '${{ inputs.package }}' --evidence-out evidence.json
+      - name: Create an independently valid V1 attestation
+        run: |
+          target/release/depguard key-generate --private-key .depguard-ci.key --public-key .depguard-ci.pub
+          target/release/depguard attest evidence.json --key .depguard-ci.key --output attestation.json
+          rm .depguard-ci.key .depguard-ci.pub
+      - name: Sign exact immutable attestation with keyless GitHub OIDC
+        run: cosign sign-blob --yes --bundle sigstore-bundle.json attestation.json
+      - name: Publish attestation and independently verified CI identity
+        run: target/release/depguard publish attestation.json --identity-proof sigstore-bundle.json --url '${{ inputs.network_url }}'

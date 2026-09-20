@@ -53,6 +53,10 @@ enum Command {
     /// other than this envelope are read or uploaded.
     Publish {
         attestation: std::path::PathBuf,
+        /// Optional Sigstore bundle produced for this exact attestation by CI.
+        /// The file is sent only when explicitly named here.
+        #[arg(long)]
+        identity_proof: Option<std::path::PathBuf>,
         #[arg(long, env = "DEPGUARD_NETWORK_URL")]
         url: String,
     },
@@ -110,7 +114,11 @@ async fn run(cli: Cli) -> Result<()> {
             public_key,
             json,
         } => attest_verify(&attestation, &public_key, json)?,
-        Command::Publish { attestation, url } => publish(&attestation, &url).await?,
+        Command::Publish {
+            attestation,
+            identity_proof,
+            url,
+        } => publish(&attestation, identity_proof.as_deref(), &url).await?,
         Command::Verify {
             package,
             json,
@@ -130,16 +138,26 @@ async fn run(cli: Cli) -> Result<()> {
     }
     Ok(())
 }
-async fn publish(attestation: &Path, url: &str) -> Result<()> {
+async fn publish(attestation: &Path, identity_proof: Option<&Path>, url: &str) -> Result<()> {
     let bytes = std::fs::read(attestation)?;
     // A publish is deliberately opt-in and refuses anything other than a valid
     // public V1 envelope before making the network request.
     let envelope: depguard_attestation::DsseEnvelope = serde_json::from_slice(&bytes)
         .map_err(|_| depguard_attestation::VerificationError::MalformedDsse)?;
     depguard_attestation::verify_envelope(&envelope)?;
-    let result = depguard_network_client::NetworkClient::new(url)?
-        .publish_bytes(bytes)
-        .await?;
+    let identity_proof = identity_proof
+        .map(|path| -> Result<serde_json::Value> {
+            serde_json::from_slice(&std::fs::read(path)?)
+                .context("identity proof must be a Sigstore bundle JSON document")
+        })
+        .transpose()?;
+    let client = depguard_network_client::NetworkClient::new(url)?;
+    // Preserve attestation-only publishing, including compatibility with an
+    // existing MVP server that only exposes `/v1/evidence`.
+    let result = match identity_proof {
+        Some(proof) => client.publish_submission(bytes, Some(proof)).await?,
+        None => client.publish_bytes(bytes).await?,
+    };
     match result.status {
         depguard_network_client::IngestStatus::Accepted => println!(
             "ACCEPTED {}{}",

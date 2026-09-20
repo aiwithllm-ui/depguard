@@ -52,6 +52,7 @@ sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio-r
 tower-http = { version = "0.6", features = ["trace", "timeout", "limit", "request-id"] }
 uuid = { version = "1.12", features = ["v7", "serde"] }
 chrono = { version = "0.4", features = ["serde"] }
+x509-parser = "0.16"
 
 [profile.release]
 lto = true

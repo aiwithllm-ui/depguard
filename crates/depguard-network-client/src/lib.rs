@@ -1,6 +1,8 @@
 //! Explicit opt-in HTTP client for the optional DepGuard global network.
 use anyhow::{Context, Result, bail};
+use base64::{Engine, engine::general_purpose::STANDARD};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
@@ -57,6 +59,41 @@ impl NetworkClient {
         }
         Ok(body)
     }
+
+    /// Submits exact already-signed V1 bytes and, only when supplied by the
+    /// caller, an independent Sigstore bundle. The wrapper is network metadata;
+    /// it cannot alter the bytes committed by the Sigstore signature.
+    pub async fn publish_submission(
+        &self,
+        attestation: Vec<u8>,
+        identity_proof: Option<Value>,
+    ) -> Result<IngestResponse> {
+        let body = NetworkSubmission {
+            depguard_attestation: STANDARD.encode(attestation),
+            identity_proof,
+        };
+        let response = self
+            .http
+            .post(format!("{}/v1/submissions", self.base_url))
+            .json(&body)
+            .send()
+            .await
+            .context("submit network submission")?;
+        let status = response.status();
+        let body: IngestResponse = response.json().await.context("decode network response")?;
+        if !status.is_success() && body.status != IngestStatus::Rejected {
+            bail!("network returned HTTP {status}");
+        }
+        Ok(body)
+    }
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct NetworkSubmission {
+    depguard_attestation: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    identity_proof: Option<Value>,
 }
 
 #[cfg(test)]

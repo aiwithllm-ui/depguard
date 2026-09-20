@@ -14,6 +14,17 @@ paths:
       responses:
         '200': { description: Accepted or duplicate, content: { application/json: { schema: { $ref: '#/components/schemas/IngestAccepted' } } } }
         '400': { description: Rejected, content: { application/json: { schema: { $ref: '#/components/schemas/IngestRejected' } } } }
+  /v1/submissions:
+    post:
+      summary: Ingest immutable V1 bytes with optional independently verified Sigstore CI identity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/NetworkSubmission' }
+      responses:
+        '200': { description: Accepted or duplicate }
+        '400': { description: Rejected; submitters cannot set assurance themselves }
   /v1/evidence/{id}:
     get:
       parameters: [{ name: id, in: path, required: true, schema: { type: string, pattern: '^sha256:[a-f0-9]{64}$' } }]
@@ -44,3 +55,10 @@ components:
       additionalProperties: false
       required: [status, reason]
       properties: { status: { const: REJECTED }, reason: { type: string } }
+    NetworkSubmission:
+      type: object
+      additionalProperties: false
+      required: [depguardAttestation]
+      properties:
+        depguardAttestation: { type: string, contentEncoding: base64, maxLength: 349528, description: Exact immutable DSSE bytes; server rejects decoded values over 256 KiB }
+        identityProof: { type: object, description: Standard Sigstore/Cosign bundle, maximum serialized size 512 KiB; verified server-side. Submitter assurance and identity claims are not accepted. }

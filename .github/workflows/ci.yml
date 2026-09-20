@@ -41,6 +41,8 @@ jobs:
         run: cargo deny check licenses
       - name: Reject unreviewed dependency sources
         run: cargo deny check sources
+      - name: Test SPDX OR-expression canonicalization
+        run: bash scripts/check-third-party-license-attribution.sh --self-test
       - name: Verify binary attribution is current
         run: |
           cargo about generate --locked --fail \
@@ -48,7 +50,8 @@ jobs:
             --config about.toml \
             licenses/third-party-licenses.hbs \
             --output-file /tmp/THIRD_PARTY_LICENSES.html
-          diff --unified=3 THIRD_PARTY_LICENSES.html /tmp/THIRD_PARTY_LICENSES.html
+          bash scripts/check-third-party-license-attribution.sh \
+            THIRD_PARTY_LICENSES.html /tmp/THIRD_PARTY_LICENSES.html
 
   postgres-network-integration:
     name: PostgreSQL network trust boundary

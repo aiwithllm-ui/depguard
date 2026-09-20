@@ -27,10 +27,19 @@ cargo deny check licenses
 ```
 
 For a no-write freshness check, generate to a temporary path with the same
-command and compare it with `THIRD_PARTY_LICENSES.html`. CI performs that
-comparison. If either tool reports an unrecognized or disallowed license, do
-not add a broad allow rule: inspect the crate's published license material and
-record a narrowly scoped, reviewable decision or flag it for human review.
+command and compare it with `THIRD_PARTY_LICENSES.html` using:
+
+```bash
+bash scripts/check-third-party-license-attribution.sh \
+  THIRD_PARTY_LICENSES.html /tmp/THIRD_PARTY_LICENSES.html
+```
+
+The comparison canonically sorts only simple SPDX `OR` terms in table cells.
+It still fails for every package, version, source, license-text, and
+non-equivalent license-expression change. CI performs that comparison. If
+either tool reports an unrecognized or disallowed license, do not add a broad
+allow rule: inspect the crate's published license material and record a
+narrowly scoped, reviewable decision or flag it for human review.
 
 The v0.1.0-alpha.1 release graph deliberately permits MIT-0 for
 `borrow-or-share 0.2.4` and CDLA-Permissive-2.0 for the `webpki-roots` trust

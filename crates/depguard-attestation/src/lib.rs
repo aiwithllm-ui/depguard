@@ -139,6 +139,31 @@ pub fn verifying_key_from_base64(value: &str) -> Result<VerifyingKey> {
         .map_err(|_| anyhow::anyhow!("invalid Ed25519 public key"))?;
     Ok(VerifyingKey::from_bytes(&array)?)
 }
+/// Derive the V1 Ed25519 public key from the envelope key identifier.  V1 local
+/// development attestations use the lowercase hexadecimal public-key encoding.
+/// This lets a verifier validate an independently supplied envelope without a
+/// side channel while preserving the frozen V1 verification rules.
+pub fn verifying_key_from_keyid(
+    keyid: &str,
+) -> std::result::Result<VerifyingKey, VerificationError> {
+    let bytes = hex::decode(keyid).map_err(|_| VerificationError::MalformedDsse)?;
+    let array: [u8; 32] = bytes
+        .try_into()
+        .map_err(|_| VerificationError::MalformedDsse)?;
+    VerifyingKey::from_bytes(&array).map_err(|_| VerificationError::MalformedDsse)
+}
+
+/// Verify a self-describing V1 local-development envelope. This is the same
+/// verifier used by the CLI; only public-key discovery is supplied by V1 keyid.
+pub fn verify_envelope(
+    envelope: &DsseEnvelope,
+) -> std::result::Result<VerificationSummary, VerificationError> {
+    if envelope.signatures.len() != 1 {
+        return Err(VerificationError::MalformedDsse);
+    }
+    let key = verifying_key_from_keyid(&envelope.signatures[0].keyid)?;
+    verify(envelope, &key)
+}
 pub fn private_key_base64(key: &SigningKey) -> String {
     STANDARD.encode(key.to_bytes())
 }

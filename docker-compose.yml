@@ -1,0 +1,27 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: depguard
+      POSTGRES_USER: depguard
+      POSTGRES_PASSWORD: depguard
+      # Local development only. Production supplies a managed PostgreSQL URL.
+      POSTGRES_HOST_AUTH_METHOD: trust
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U depguard -d depguard"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    ports: ["5432:5432"]
+    volumes: ["depguard-postgres:/var/lib/postgresql/data"]
+  server:
+    build: .
+    environment:
+      DATABASE_URL: postgresql://depguard:depguard@postgres:5432/depguard
+      DEPGUARD_SERVER_BIND: 0.0.0.0:8080
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports: ["8080:8080"]
+volumes:
+  depguard-postgres:

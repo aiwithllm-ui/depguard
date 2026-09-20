@@ -1,0 +1,46 @@
+openapi: 3.1.0
+info:
+  title: DepGuard Global Compatibility Network API
+  version: 1.0.0
+paths:
+  /v1/evidence:
+    post:
+      summary: Independently verify and ingest one signed DepGuard Attestation v1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DsseEnvelope' }
+      responses:
+        '200': { description: Accepted or duplicate, content: { application/json: { schema: { $ref: '#/components/schemas/IngestAccepted' } } } }
+        '400': { description: Rejected, content: { application/json: { schema: { $ref: '#/components/schemas/IngestRejected' } } } }
+  /v1/evidence/{id}:
+    get:
+      parameters: [{ name: id, in: path, required: true, schema: { type: string, pattern: '^sha256:[a-f0-9]{64}$' } }]
+      responses: { '200': { description: Original immutable DSSE envelope }, '404': { description: Not found } }
+  /v1/attestations/verify:
+    post: { summary: Stateless V1 verification convenience endpoint, responses: { '200': { description: Verification result }, '400': { description: Invalid attestation } } }
+  /v1/packages/{ecosystem}/{package}: { get: { summary: Package metadata from accepted evidence, responses: { '200': { description: Package }, '404': { description: Not found } } } }
+  /v1/packages/{ecosystem}/{package}/versions/{version}: { get: { summary: Version transition metadata, responses: { '200': { description: Version }, '404': { description: Not found } } } }
+  /v1/transitions/{ecosystem}/{package}/{from}/{to}: { get: { summary: Factual transition aggregates, responses: { '200': { description: Aggregate }, '404': { description: Not found } } } }
+  /v1/transitions/{ecosystem}/{package}/{from}/{to}/evidence: { get: { summary: Cursor-paginated evidence list, parameters: [{ name: cursor, in: query, schema: { type: string } }, { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 100 } }], responses: { '200': { description: Evidence page }, '404': { description: Not found } } } }
+components:
+  schemas:
+    DsseEnvelope:
+      type: object
+      additionalProperties: false
+      required: [payloadType, payload, signatures]
+      properties:
+        payloadType: { const: application/vnd.in-toto+json }
+        payload: { type: string, contentEncoding: base64 }
+        signatures: { type: array, minItems: 1 }
+    IngestAccepted:
+      type: object
+      additionalProperties: false
+      required: [status, evidenceId, duplicate]
+      properties: { status: { const: ACCEPTED }, evidenceId: { type: string }, duplicate: { type: boolean } }
+    IngestRejected:
+      type: object
+      additionalProperties: false
+      required: [status, reason]
+      properties: { status: { const: REJECTED }, reason: { type: string } }

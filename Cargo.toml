@@ -15,6 +15,9 @@ members = [
   "crates/depguard-policy",
   "crates/depguard-attestation",
   "crates/depguard-evidence",
+  "crates/depguard-network-client",
+  "crates/depguard-server",
+  "crates/depguard-worker",
 ]
 
 [workspace.package]
@@ -26,7 +29,7 @@ rust-version = "1.88"
 [workspace.dependencies]
 anyhow = "1.0"
 base64 = "0.22"
-clap = { version = "4.5", features = ["derive"] }
+clap = { version = "4.5", features = ["derive", "env"] }
 hex = "0.4"
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
 serde = { version = "1.0", features = ["derive"] }
@@ -43,6 +46,12 @@ jsonschema = "0.30"
 ed25519-dalek = { version = "2.1", features = ["rand_core"] }
 rand_core = { version = "0.6", features = ["getrandom"] }
 serde_json_canonicalizer = "0.3.2"
+axum = { version = "0.8", features = ["json", "macros"] }
+http = "1.2"
+sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio-rustls", "postgres", "json", "uuid", "chrono", "migrate", "macros"] }
+tower-http = { version = "0.6", features = ["trace", "timeout", "limit", "request-id"] }
+uuid = { version = "1.12", features = ["v7", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
 
 [profile.release]
 lto = true

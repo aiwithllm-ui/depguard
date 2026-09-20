@@ -1,0 +1,13 @@
+[package]
+name = "depguard-worker"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+sqlx.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+depguard-server = { path = "../depguard-server" }

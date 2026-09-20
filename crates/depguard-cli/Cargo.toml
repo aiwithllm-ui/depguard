@@ -17,6 +17,7 @@ tracing.workspace = true
 tracing-subscriber.workspace = true
 depguard-attestation = { path = "../depguard-attestation" }
 depguard-evidence = { path = "../depguard-evidence" }
+depguard-network-client = { path = "../depguard-network-client" }
 depguard-config = { path = "../depguard-config" }
 depguard-core = { path = "../depguard-core" }
 depguard-diff = { path = "../depguard-diff" }

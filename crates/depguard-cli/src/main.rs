@@ -49,6 +49,13 @@ enum Command {
         #[arg(long)]
         json: bool,
     },
+    /// Explicitly publish one already-signed public V1 attestation. No files
+    /// other than this envelope are read or uploaded.
+    Publish {
+        attestation: std::path::PathBuf,
+        #[arg(long, env = "DEPGUARD_NETWORK_URL")]
+        url: String,
+    },
     Verify {
         package: String,
         #[arg(long)]
@@ -103,6 +110,7 @@ async fn run(cli: Cli) -> Result<()> {
             public_key,
             json,
         } => attest_verify(&attestation, &public_key, json)?,
+        Command::Publish { attestation, url } => publish(&attestation, &url).await?,
         Command::Verify {
             package,
             json,
@@ -119,6 +127,33 @@ async fn run(cli: Cli) -> Result<()> {
             )
             .await?
         }
+    }
+    Ok(())
+}
+async fn publish(attestation: &Path, url: &str) -> Result<()> {
+    let bytes = std::fs::read(attestation)?;
+    // A publish is deliberately opt-in and refuses anything other than a valid
+    // public V1 envelope before making the network request.
+    let envelope: depguard_attestation::DsseEnvelope = serde_json::from_slice(&bytes)
+        .map_err(|_| depguard_attestation::VerificationError::MalformedDsse)?;
+    depguard_attestation::verify_envelope(&envelope)?;
+    let result = depguard_network_client::NetworkClient::new(url)?
+        .publish_bytes(bytes)
+        .await?;
+    match result.status {
+        depguard_network_client::IngestStatus::Accepted => println!(
+            "ACCEPTED {}{}",
+            result.evidence_id.unwrap_or_else(|| "unknown".into()),
+            if result.duplicate.unwrap_or(false) {
+                " (duplicate)"
+            } else {
+                ""
+            }
+        ),
+        depguard_network_client::IngestStatus::Rejected => anyhow::bail!(
+            "network rejected attestation: {}",
+            result.reason.unwrap_or_else(|| "UNKNOWN".into())
+        ),
     }
     Ok(())
 }

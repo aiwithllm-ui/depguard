@@ -98,4 +98,5 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.tag }}
+          GH_REPO: ${{ github.repository }}
         run: gh release upload "$RELEASE_TAG" release-artifacts/* --clobber
